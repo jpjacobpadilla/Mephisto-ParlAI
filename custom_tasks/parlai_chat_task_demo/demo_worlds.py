@@ -173,7 +173,7 @@ def make_world(opt, agents):
 
     # Randomize which agent will talk first. 
     if len(bots) == 0:
-        agents.shuffle()
+        random.shuffle(agents)
 
     return MultiAgentDialogWorld(opt, agents + bots)
 
