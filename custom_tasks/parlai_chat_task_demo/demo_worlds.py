@@ -3,12 +3,13 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
+import random  # Used to randomize which agent starts talking first.
+
 from parlai.crowdsourcing.utils.worlds import CrowdOnboardWorld, CrowdTaskWorld  # type: ignore
 from parlai.core.worlds import validate  # type: ignore
 from parlai.agents._custom.remote import RemoteAgent
 
 from joblib import Parallel, delayed  # type: ignore
-
 
 class MultiAgentDialogOnboardWorld(CrowdOnboardWorld):
     def __init__(self, opt, agent):
@@ -161,14 +162,18 @@ def make_world(opt, agents):
         bot = RemoteAgent({"host_bot": '34.170.116.203', 
                            "port_bot": "35496"})
         # This is a hack to skip the OverWorld and TaskWorld by 
-        #   sending dummy messages. OverWorld accept any message
-        #   and TaskWorld accept only "begin" as the identifier.
+        # sending dummy messages. OverWorld accept any message
+        # and TaskWorld accept only "begin" as the identifier.
         bot.observe({"text": "dummy"})
         _ = bot.act()
         bot.observe({"text": "begin"})
         _ = bot.act()
 
         bots.append(bot)
+
+    # Randomize which agent will talk first. 
+    if len(bots) == 0:
+        agents.shuffle()
 
     return MultiAgentDialogWorld(opt, agents + bots)
 
