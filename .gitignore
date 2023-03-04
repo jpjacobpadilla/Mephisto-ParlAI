@@ -1,0 +1,27 @@
+# mac junk
+*.DS_Store
+
+# visual studio code junk
+.vscode/
+.vscode/settings.json
+
+# emacs backups
+*~
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Enviroment 
+venv/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Distribution
+*.egg-info/
+*.egg
+
+# Mephisto data
+mephisto-data/data/

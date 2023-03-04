@@ -1,0 +1,21 @@
+[2023-03-03 18:44:47,271][root][WARNING] - Mephisto supports rich run-time metrics visualization through Prometheus and Grafana. If you'd like to use this feature, use `mephisto metrics install` to install.(Current install dir is '/Users/jacobpadilla/Desktop/Mephisto-v3/mephisto/scripts/metrics')'
+[2023-03-03 18:44:48,063][mephisto.operations.operator][ERROR] - Ran into error while launching run: 
+Traceback (most recent call last):
+  File "/Users/jacobpadilla/Desktop/Mephisto-v3/mephisto/operations/operator.py", line 518, in launch_task_run
+    return self.launch_task_run_or_die(
+  File "/Users/jacobpadilla/Desktop/Mephisto-v3/mephisto/operations/operator.py", line 241, in launch_task_run_or_die
+    BlueprintClass.assert_task_args(run_config, shared_state)
+  File "/Users/jacobpadilla/Desktop/Mephisto-v3/mephisto/abstractions/blueprints/parlai_chat/parlai_chat_blueprint.py", line 226, in assert_task_args
+    world_module = import_module(world_module_name)
+  File "/Users/jacobpadilla/opt/anaconda3/envs/mephisto-venv-v3/lib/python3.8/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1014, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 991, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 975, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 671, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 843, in exec_module
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "/Users/jacobpadilla/Desktop/Mephisto-v3/custom_tasks/parlai_chat_task_demo/demo_worlds.py", line 8, in <module>
+    from parlai.agents._custom.remote import RemoteAgent
+ModuleNotFoundError: No module named 'parlai.agents._custom'
+[2023-03-03 18:44:48,071][mephisto.operations.operator][INFO] - operator shutting down
