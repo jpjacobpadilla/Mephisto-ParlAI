@@ -3,8 +3,6 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-import random  # Used to randomize which agent starts talking first.
-
 from parlai.crowdsourcing.utils.worlds import CrowdOnboardWorld, CrowdTaskWorld  # type: ignore
 from parlai.core.worlds import validate  # type: ignore
 from parlai.agents._custom.remote import RemoteAgent
@@ -170,10 +168,6 @@ def make_world(opt, agents):
         _ = bot.act()
 
         bots.append(bot)
-
-    # Randomize which agent will talk first. 
-    if len(bots) == 0:
-        random.shuffle(agents)
 
     return MultiAgentDialogWorld(opt, agents + bots)
 
