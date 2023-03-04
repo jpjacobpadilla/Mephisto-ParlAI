@@ -154,8 +154,9 @@ def validate_onboarding(data):
 
 
 def make_world(opt, agents):
-
+    
     bots = []
+
     while len(agents) + len(bots) < 2:
         bot = RemoteAgent({"host_bot": '34.170.116.203', 
                            "port_bot": "35496"})
