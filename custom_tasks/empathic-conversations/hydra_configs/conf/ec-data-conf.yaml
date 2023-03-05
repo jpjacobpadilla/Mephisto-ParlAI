@@ -9,10 +9,12 @@ mephisto:
     task_description_file: ${task_dir}/task_description.html
     custom_source_dir: ${task_dir}/custom_simple
     num_conversations: 15
+  architect:
+    port: 3000
   task:
     # We expect to be able to handle 25 concurrent conversations without issue
     max_num_concurrent_units: 25
-    max_launch_timeout: 180  # Yuxuan's new feature.
+    max_launch_timeout: 10  # Yuxuan's new feature.
     task_name: ec-data-collection-task
     task_title: "Article Conversation"
     task_description: >
