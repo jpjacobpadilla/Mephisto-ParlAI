@@ -158,7 +158,7 @@ def make_world(opt, agents):
     bots = []
 
     while len(agents) + len(bots) < 2:
-        bot = RemoteAgent({"host_bot": '34.170.116.203', 
+        bot = RemoteAgent({"host_bot": 'localhost', 
                            "port_bot": "35496"})
         # This is a hack to skip the OverWorld and TaskWorld by 
         # sending dummy messages. OverWorld accept any message

@@ -26,6 +26,8 @@ import subprocess
 import sys
 from mephisto.abstractions.blueprint import AgentState
 from uuid import uuid4
+
+from parlai.agents._custom.remote import RemoteAgent
 from random import shuffle  # For randomizing who starts talking
 
 from typing import ClassVar, List, Type, Any, Dict, Union, cast, TYPE_CHECKING
@@ -220,7 +222,8 @@ class ParlAIChatTaskRunner(TaskRunner):
             assert agent is not None, "task was not fully assigned"
   
         # To randomize order of first talker. Edit by Jacob
-        shuffle(agents)
+        if not any([isinstance(agent, RemoteAgent) for agent in agents]):
+            shuffle(agents)
         
         opt: Dict[str, Any] = cast("SharedParlAITaskState", self.shared_state).world_opt
         parlai_agents = [MephistoAgentWrapper(a) for a in agents]
