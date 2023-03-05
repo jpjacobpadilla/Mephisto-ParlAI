@@ -17,3 +17,5 @@ mephisto:
     task_title: "Article Conversation"
     task_description: >
       Empathic conversation chat about an article between two agents or one agent and an empathic chatbot.
+    task_reward: 0.3
+    task_tags: "dynamic,chat,testing"
