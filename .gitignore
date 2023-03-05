@@ -32,6 +32,6 @@ package-lock.json
 package.json
 
 # Mephisto Stuff
-mephisto-src/outputs/
+outputs/
 mephisto-src/tmp/
 
