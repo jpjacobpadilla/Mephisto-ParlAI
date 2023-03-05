@@ -31,5 +31,7 @@ node_modules/
 package-lock.json
 package.json
 
-# Mephisto Outputs
-outputs/
+# Mephisto Stuff
+mephisto-src/outputs/
+mephisto-src/tmp/
+
