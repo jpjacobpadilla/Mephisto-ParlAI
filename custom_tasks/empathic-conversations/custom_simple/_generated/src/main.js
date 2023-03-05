@@ -50,15 +50,6 @@ function MainApp() {
           chatTitle={taskConfig.chat_title}
           taskDescriptionHtml={taskConfig.task_description}
         >
-          <h2>This is a custom Task Description built from a source dir</h2>
-          <p>
-            It has the ability to do a number of things, like directly access
-            the contents of task data, view the number of messages so far, and
-            pretty much anything you make like. We're also able to control other
-            components as well, as in this example we've made it so that if you
-            click a message, it will alert with that message idx.
-          </p>
-          <p>The regular task description content will now appear below:</p>
         </DefaultTaskDescription>
       )}
     />
