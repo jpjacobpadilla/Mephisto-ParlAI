@@ -83,40 +83,17 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
                     continue
                 agent.observe(
                     {
-                        "id": "Coordinator",
-                        "text": "Please fill out the form to complete the chat:",
-                        "task_data": {
-                            "respond_with_form": [
-                                {
-                                    "type": "choices",
-                                    "question": "How much did you enjoy talking to this user?",
-                                    "choices": [
-                                        "Not at all",
-                                        "A little",
-                                        "Somewhat",
-                                        "A lot",
-                                    ],
-                                },
-                                {
-                                    "type": "choices",
-                                    "question": "Do you think this user is a bot or a human?",
-                                    "choices": [
-                                        "Definitely a bot",
-                                        "Probably a bot",
-                                        "Probably a human",
-                                        "Definitely a human",
-                                    ],
-                                },
-                                {"type": "text", "question": "Enter any comment here"},
-                            ]
-                        },
+                    "id": "Coordinator",
+                    "text": 
+                        f'''    
+                        You are done with the conversation. 
+                        Please enter the following code into the below 
+                        input box and continue with the rest of the survey.
+                        
+                        CODE: {agent.mephisto_agent.unit_id}
+                        '''
                     }
                 )
-                agent.act()  # Request a response
-            for agent in self.agents:  # Ensure you get the response
-                if isinstance(agent, RemoteAgent):
-                    continue
-                form_result = agent.act(timeout=self.opt["turn_timeout"])
 
     def prep_save_data(self, agent):
         """Process and return any additional data from this world you may want to store"""
@@ -169,7 +146,39 @@ def make_world(opt, agents):
         _ = bot.act()
 
         bots.append(bot)
+    '''
+       def __init__(self, agent: Union[Agent, OnboardingAgent]):
+        self.mephisto_agent = agent
+        self.__agent_id = "unnamed agent"
+        self.__mephisto_agent_id = agent.get_agent_id()
+        self.__act_requested = False
 
+    @property
+    def id(self):
+        """Alias for agent_id"""
+        return self.__agent_id
+
+    @property
+    def agent_id(self):
+        """
+        Agent IDs in ParlAI are used to identify the speaker,
+        and often are a label like "teacher"
+        """
+        return self.__agent_id
+
+    @agent_id.setter
+    def agent_id(self, new_agent_id: str):
+        """
+        We want to be able to display these labels to the
+        frontend users, so when these are updated by a
+        world we forward that to the frontend
+        """
+        self.mephisto_agent.observe(
+            {"task_data": {"agent_display_name": new_agent_id}},
+        )
+        self.__agent_id = new_agent_id
+    '''
+    print(agents[0].mephisto_agent.__dict__)
     return MultiAgentDialogWorld(opt, agents + bots)
 
 
