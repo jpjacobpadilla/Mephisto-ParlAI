@@ -11,7 +11,7 @@ from joblib import Parallel, delayed  # type: ignore
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine.base import Engine
-import database  # Database credentials
+import project_credentials as pc  # project credentials for database and Remote Agent
 
 from typing import List, Union
 
@@ -54,7 +54,7 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
 
         # Empathic conversations 2 research database
         self.ec2_engine
-        
+
         # Local Mephisto db
         self.local_db
 
@@ -154,20 +154,14 @@ def get_world_params():
 
 
 def make_world(opt, agents):
-    # The four following variables are currently hard coded and need to be manually changed.
-    HOST_BOT = 'localhost'
-    PORT_BOT = '35496'
-    BOT_NAME = 'ECHO'
-    LOCAL_SQLITE_PATH = '/Users/jacobpadilla/Desktop/Research/Mephisto/Mephisto-ParlAI/mephisto-data/data/database.db'
-
     bots = []
 
     while len(agents) + len(bots) < 2:
-        bot = RemoteAgent({"host_bot": HOST_BOT, 
-                           "port_bot": PORT_BOT})
+        bot = RemoteAgent({"host_bot": pc.HOST_BOT, 
+                           "port_bot": pc.PORT_BOT})
         
         # agent_name_for_db should match the agent description in the database.
-        bot.agent_name_for_db = BOT_NAME
+        bot.agent_name_for_db = pc.BOT_NAME
 
         # This is a hack to skip the OverWorld and TaskWorld by 
         # sending dummy messages. OverWorld accept any message
@@ -184,12 +178,12 @@ def make_world(opt, agents):
 
     # May want to remove pymysql dbapi for use on GCP.
     conn_string = 'mysql+pymysql://{user}:{password}@{host}:{port}/{db}?charset:{encoding}'.format(
-        user=database.user, password=database.password, host=database.host, 
-        port=database.port, db=database.schema, encoding = 'utf-8')
+        user=pc.EC2_USER, password=pc.EC2_PASSWORD, host=pc.EC2_HOST, 
+        port=pc.EC2_PORT, db=pc.EC2_SCHEMA, encoding = 'utf-8')
     ec2_engine = create_engine(conn_string)
 
     # Now we need to make sure that the agents are in the agent table in the ec_2 schema, research database
-    add_agents_db(ec2_engine, LOCAL_SQLITE_PATH, agents)
+    add_agents_db(ec2_engine, pc.LOCAL_SQLITE_PATH, agents)
     # Add a conversation to the "conversation" table
     conversation_id = add_conversation_db(ec2_engine)
     # Add two rows to conversation_agent table
