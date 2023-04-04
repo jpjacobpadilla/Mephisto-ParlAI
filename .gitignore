@@ -37,5 +37,5 @@ mephisto-src/tmp/
 
 
 # secrets
-project_credentials.py
+custom_tasks/empathic-conversations/project_credentials.py
 
