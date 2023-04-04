@@ -51,6 +51,10 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
         self.current_turns = 0
         self.send_task_data = opt.get("send_task_data", False)
         self.opt = opt
+
+        #
+        self.ec2_engine
+
         for idx, agent in enumerate(self.agents):
             agent.agent_id = f"Chat Agent {idx + 1}"
 
@@ -74,7 +78,9 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
                             "utterance_count": self.current_turns + index,
                         },
                     )
+                print(acts[index])
             except TypeError:
+                print(acts[index])
                 acts[index] = agent.act()  # not MTurkAgent
             if acts[index]["episode_done"]:
                 self.episodeDone = True
@@ -101,6 +107,9 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
                         '''
                     }
                 )
+
+    def add_utterance_db(agent_id, utterance):
+        pass
 
     def prep_save_data(self, agent):
         """Process and return any additional data from this world you may want to store"""
