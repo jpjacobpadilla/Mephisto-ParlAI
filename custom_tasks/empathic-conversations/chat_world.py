@@ -15,6 +15,8 @@ import project_credentials as pc  # project credentials for database and Remote 
 
 from typing import List, Union
 
+import json
+import yaml
 
 class MultiAgentDialogOnboardWorld(CrowdOnboardWorld):
     def __init__(self, opt, agent):
@@ -134,10 +136,17 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
         This will add a new conversation to the table but will set article_id to NULL. 
         We do not know the exact article right now and will have to fill that out using the Qualtrics data.
         """
-        query = text('''insert into conversation (article_id) values (NULL);''')
+        # Read the config file (so that it can be put in db)
+        with open(pc.YAML_MEPHISTO_CONFIG_FILE, "r") as yaml_file:
+            yaml_data = yaml.safe_load(yaml_file)
+
+        # Convert the YAML data to JSON format
+        json_data = json.dumps(yaml_data, indent=2)
+
+        query = text('''insert into conversation (article_id, mephisto_settings) values (:article, :ms);''')
         
         with self.ec2_engine.begin() as conn:
-            conn.execute(query)
+            conn.execute(query, {'article': None, 'ms': json_data})
             conv_id = conn.execute(text('select last_insert_id();')).fetchone()[0]
 
         return conv_id
