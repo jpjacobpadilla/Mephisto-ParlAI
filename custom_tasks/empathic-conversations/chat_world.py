@@ -66,9 +66,9 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
         # Make sure that the agents are in the agent table in the ec_2 schema, research database
         self.add_agents_db()
         # Add a conversation to the "conversation" table
-        conversation_id = self.add_conversation_db()
+        self.conversation_id = self.add_conversation_db()
         # Add two rows to conversation_agent table
-        self.merge_conversation_agents_db(conversation_id)
+        self.merge_conversation_agents_db(self.conversation_id)
         
         # A Mephisto thing...
         for idx, agent in enumerate(self.agents):
@@ -176,15 +176,16 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
                             "utterance_count": self.current_turns + index,
                         },
                     )
-                print(acts[index])
+                self.add_utterance_db(agent_id=agent.ec2_agent_id, utterance=acts[index].get('text'))
             except TypeError:
-                print(acts[index])
                 acts[index] = agent.act()  # not MTurkAgent
+                self.add_utterance_db(agent_id=agent.ec2_agent_id, utterance=acts[index].get('text'))
             if acts[index]["episode_done"]:
                 self.episodeDone = True
             for other_agent in self.agents:
                 if other_agent != agent:
                     other_agent.observe(validate(acts[index]))
+
         if self.current_turns >= self.max_turns:
             self.episodeDone = True
             for agent in self.agents:
@@ -206,8 +207,17 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
                     }
                 )
 
-    def add_utterance_db(agent_id, utterance):
-        pass
+    def add_utterance_db(self, agent_id: int, utterance: str) -> None:
+        query = text('''
+        insert into utterance(conversation_id, agent_id, content)
+        values (:cid, :aid, :content)''')
+        
+        params = {'cid': self.conversation_id, 'aid': agent_id, 'content': utterance}
+        
+        with self.ec2_engine.begin() as conn:
+            conn.execute(query, params)
+
+        print(f'Added utterance to db: "{utterance}"')
 
     def prep_save_data(self, agent):
         """Process and return any additional data from this world you may want to store"""
