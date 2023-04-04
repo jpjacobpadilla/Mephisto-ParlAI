@@ -52,8 +52,11 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
         self.send_task_data = opt.get("send_task_data", False)
         self.opt = opt
 
-        #
+        # Empathic conversations 2 research database
         self.ec2_engine
+        
+        # Local Mephisto db
+        self.local_db
 
         for idx, agent in enumerate(self.agents):
             agent.agent_id = f"Chat Agent {idx + 1}"
