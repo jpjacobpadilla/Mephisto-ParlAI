@@ -13,7 +13,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine.base import Engine
 import database  # Database credentials
 
-from typing import Union
+from typing import List, Union
 
 
 class MultiAgentDialogOnboardWorld(CrowdOnboardWorld):
@@ -137,6 +137,10 @@ def validate_onboarding(data):
     return True
 
 
+def get_world_params():
+    return {"agent_count": 2}
+
+
 def make_world(opt, agents):
     # The four following variables are currently hard coded and need to be manually changed.
     HOST_BOT = 'localhost'
@@ -166,20 +170,32 @@ def make_world(opt, agents):
     # Combine agents with bots
     agents.extend(bots)
 
-    # Now we need to make sure that the agents are in the agent table in the ec_2 schema, research database
     # May want to remove pymysql dbapi for use on GCP.
     conn_string = 'mysql+pymysql://{user}:{password}@{host}:{port}/{db}?charset:{encoding}'.format(
         user=database.user, password=database.password, host=database.host, 
         port=database.port, db=database.schema, encoding = 'utf-8')
     ec2_engine = create_engine(conn_string)
 
+    # Now we need to make sure that the agents are in the agent table in the ec_2 schema, research database
+    add_agents_db(ec2_engine, LOCAL_SQLITE_PATH, agents)
+    # Add a conversation to the "conversation" table
+    conversation_id = add_conversation_db(ec2_engine)
+    # Add two rows to conversation_agent table
+    merge_conversation_agents_db(ec2_engine, agents, conversation_id)
+
+    return MultiAgentDialogWorld(opt, agents)
+
+
+def add_agents_db(ec2_engine: Engine, sqlite_path: str, 
+                  agents: List[Union["Agent", RemoteAgent]]) -> None:
     for agent in agents:
         if isinstance(agent, RemoteAgent):
-            agent_db_setup(ec2_engine, agent.agent_name_for_db, 'c')
+            id = agent_db_setup(ec2_engine, agent.agent_name_for_db, 'c')
+            agent.ec2_agent_id = id
 
         else:
             # Get worker_id that was sent via query string. This is located in the Mephisto local db
-            local_engine = create_engine(f'sqlite:///{LOCAL_SQLITE_PATH}')
+            local_engine = create_engine(f'sqlite:///{sqlite_path}')
 
             query = text('''
                 select worker_name
@@ -194,12 +210,11 @@ def make_world(opt, agents):
             print(f'Worker Name: {worker_name}')
 
             agent.agent_name_for_db = worker_name
-            agent_db_setup(ec2_engine, agent.agent_name_for_db, 'w')
+            id = agent_db_setup(ec2_engine, agent.agent_name_for_db, 'w')
+            agent.ec2_agent_id = id
 
-    return MultiAgentDialogWorld(opt, agents)
 
-
-def agent_db_setup(engine: Engine, name: str, type: Union['w', 'c'], remove_sandbox_postfix=True) -> None:
+def agent_db_setup(engine: Engine, name: str, type: Union['w', 'c'], remove_sandbox_postfix=True) -> int:
     if remove_sandbox_postfix and name[-8:] == '_sandbox':
         name = name[:-8]
 
@@ -209,16 +224,47 @@ def agent_db_setup(engine: Engine, name: str, type: Union['w', 'c'], remove_sand
         where description = :name;''')
 
     with engine.begin() as conn:
-        result = conn.execute(query, {'name': name})
-
-    if result.fetchone() is None:
+        result = conn.execute(query, {'name': name}).fetchone()
+    
+    if result is None:
         query = text('''
             insert into agent (agent_type, description) 
             values (:type, :name);''')
         
         with engine.begin() as conn:
             conn.execute(query, {'name': name, 'type': type})
+            agent_id = conn.execute(text('select last_insert_id();')).fetchone()[0]
+
+    else:
+        agent_id = result[0]
+
+    return agent_id
 
 
-def get_world_params():
-    return {"agent_count": 2}
+def add_conversation_db(ec2_engine: Engine) -> int:
+    """
+    This will add a new conversation to the table but will set article_id to NULL. 
+    We do not know the exact article right now and will have to fill that out using the Qualtrics data.
+    """
+    query = text('''insert into conversation (article_id) values (NULL);''')
+    
+    with ec2_engine.begin() as conn:
+        conn.execute(query)
+        agent_id = conn.execute(text('select last_insert_id();')).fetchone()[0]
+
+    return agent_id
+
+def merge_conversation_agents_db(ec2_engine: Engine, agents: List[Union["Agent", RemoteAgent]], 
+                                 conversation_id: int) -> None:
+    query = text('''
+        insert into conversation_agent (conversation_id, agent_id, agent_unit_id)
+        values (:cid, :aid, :auid);''')
+
+    for agent in agents:
+        with ec2_engine.begin() as conn:
+            params = {
+                'cid': conversation_id,
+                'aid': agent.ec2_agent_id,
+                'auid': agent.mephisto_agent.unit_id if not isinstance(agent, RemoteAgent) else None
+            }
+            conn.execute(query, params)
