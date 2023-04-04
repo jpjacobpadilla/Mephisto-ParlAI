@@ -9,6 +9,13 @@ from parlai.agents._custom.remote import RemoteAgent
 
 from joblib import Parallel, delayed  # type: ignore
 
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine.base import Engine
+import database  # Database credentials
+
+from typing import Union
+
+
 class MultiAgentDialogOnboardWorld(CrowdOnboardWorld):
     def __init__(self, opt, agent):
         super().__init__(opt, agent)
@@ -131,12 +138,21 @@ def validate_onboarding(data):
 
 
 def make_world(opt, agents):
-    
+    # The four following variables are currently hard coded and need to be manually changed.
+    HOST_BOT = 'localhost'
+    PORT_BOT = '35496'
+    BOT_NAME = 'ECHO'
+    LOCAL_SQLITE_PATH = '/Users/jacobpadilla/Desktop/Research/Mephisto/Mephisto-ParlAI/mephisto-data/data/database.db'
+
     bots = []
 
     while len(agents) + len(bots) < 2:
-        bot = RemoteAgent({"host_bot": 'localhost', 
-                           "port_bot": "35496"})
+        bot = RemoteAgent({"host_bot": HOST_BOT, 
+                           "port_bot": PORT_BOT})
+        
+        # agent_name_for_db should match the agent description in the database.
+        bot.agent_name_for_db = BOT_NAME
+
         # This is a hack to skip the OverWorld and TaskWorld by 
         # sending dummy messages. OverWorld accept any message
         # and TaskWorld accept only "begin" as the identifier.
@@ -146,40 +162,62 @@ def make_world(opt, agents):
         _ = bot.act()
 
         bots.append(bot)
-    '''
-       def __init__(self, agent: Union[Agent, OnboardingAgent]):
-        self.mephisto_agent = agent
-        self.__agent_id = "unnamed agent"
-        self.__mephisto_agent_id = agent.get_agent_id()
-        self.__act_requested = False
 
-    @property
-    def id(self):
-        """Alias for agent_id"""
-        return self.__agent_id
+    # Combine agents with bots
+    agents.extend(bots)
 
-    @property
-    def agent_id(self):
-        """
-        Agent IDs in ParlAI are used to identify the speaker,
-        and often are a label like "teacher"
-        """
-        return self.__agent_id
+    # Now we need to make sure that the agents are in the agent table in the ec_2 schema, research database
+    # May want to remove pymysql dbapi for use on GCP.
+    conn_string = 'mysql+pymysql://{user}:{password}@{host}:{port}/{db}?charset:{encoding}'.format(
+        user=database.user, password=database.password, host=database.host, 
+        port=database.port, db=database.schema, encoding = 'utf-8')
+    ec2_engine = create_engine(conn_string)
 
-    @agent_id.setter
-    def agent_id(self, new_agent_id: str):
-        """
-        We want to be able to display these labels to the
-        frontend users, so when these are updated by a
-        world we forward that to the frontend
-        """
-        self.mephisto_agent.observe(
-            {"task_data": {"agent_display_name": new_agent_id}},
-        )
-        self.__agent_id = new_agent_id
-    '''
-    print(agents[0].mephisto_agent.__dict__)
-    return MultiAgentDialogWorld(opt, agents + bots)
+    for agent in agents:
+        if isinstance(agent, RemoteAgent):
+            agent_db_setup(ec2_engine, agent.agent_name_for_db, 'c')
+
+        else:
+            # Get worker_id that was sent via query string. This is located in the Mephisto local db
+            local_engine = create_engine(f'sqlite:///{LOCAL_SQLITE_PATH}')
+
+            query = text('''
+                select worker_name
+                from workers as w
+                inner join agents as a on a.worker_id=w.worker_id
+                where a.unit_id = :unit_id;''')
+
+            with local_engine.begin() as conn:
+                result = conn.execute(query, {'unit_id': agent.mephisto_agent.unit_id})
+                worker_name = result.fetchone()[0]
+
+            print(f'Worker Name: {worker_name}')
+
+            agent.agent_name_for_db = worker_name
+            agent_db_setup(ec2_engine, agent.agent_name_for_db, 'w')
+
+    return MultiAgentDialogWorld(opt, agents)
+
+
+def agent_db_setup(engine: Engine, name: str, type: Union['w', 'c'], remove_sandbox_postfix=True) -> None:
+    if remove_sandbox_postfix and name[-8:] == '_sandbox':
+        name = name[:-8]
+
+    query = text('''
+        select agent_id
+        from agent
+        where description = :name;''')
+
+    with engine.begin() as conn:
+        result = conn.execute(query, {'name': name})
+
+    if result.fetchone() is None:
+        query = text('''
+            insert into agent (agent_type, description) 
+            values (:type, :name);''')
+        
+        with engine.begin() as conn:
+            conn.execute(query, {'name': name, 'type': type})
 
 
 def get_world_params():
