@@ -207,7 +207,7 @@ def add_agents_db(ec2_engine: Engine, sqlite_path: str,
                 result = conn.execute(query, {'unit_id': agent.mephisto_agent.unit_id})
                 worker_name = result.fetchone()[0]
 
-            print(f'Worker Name: {worker_name}')
+            print(f'Worker Name: {worker_name} Unit ID: {agent.mephisto_agent.unit_id}')
 
             agent.agent_name_for_db = worker_name
             id = agent_db_setup(ec2_engine, agent.agent_name_for_db, 'w')
