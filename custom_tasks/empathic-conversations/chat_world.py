@@ -209,7 +209,7 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
                             f'''    
                             You are done with the conversation. 
                             
-                            Please enter the following code into the below 
+                            Please carefully enter the following code into the below 
                             input box and continue with the rest of the survey.
                             
                             CODE: {agent.mephisto_agent.unit_id}
