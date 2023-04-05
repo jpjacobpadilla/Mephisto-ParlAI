@@ -201,21 +201,21 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
                 if isinstance(agent, RemoteAgent):
                     agent.observe({"text": "[DONE]"})
                     _ = agent.act()
-                    continue
-                agent.observe(
-                    {
-                    "id": "Coordinator",
-                    "text": 
-                        f'''    
-                        You are done with the conversation. 
-                        
-                        Please enter the following code into the below 
-                        input box and continue with the rest of the survey.
-                        
-                        CODE: {agent.mephisto_agent.unit_id}
-                        '''
-                    }
-                )
+                else:
+                    agent.observe(
+                        {
+                        "id": "Coordinator",
+                        "text": 
+                            f'''    
+                            You are done with the conversation. 
+                            
+                            Please enter the following code into the below 
+                            input box and continue with the rest of the survey.
+                            
+                            CODE: {agent.mephisto_agent.unit_id}
+                            '''
+                        }
+                    )
 
     def add_utterance_db(self, agent_id: int, utterance: str) -> None:
         query = text('''
