@@ -77,6 +77,17 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
             agent.agent_id = f"Chat Agent {idx + 1}"
 
     def add_agents_db(self) -> None:
+        """
+        Makes sure that each Agent table is in the ec2 schema.
+
+        This method gets the worker_id (name) of the agent which should be unique and then
+        self.agent_db_setup() will take the worker name and update the table. Then it will return 
+        the primary key (agent_id col) of the agent in the table.
+
+        This primary key is set to ec2_agent_id and will be used later in the conversation to match
+        which utterances & conversations belong to which agents.
+        """
+
         for agent in self.agents:
             if isinstance(agent, RemoteAgent):
                 id = self.agent_db_setup(agent.agent_name_for_db, type='c')
