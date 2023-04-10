@@ -49,7 +49,8 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
         self.agents: List[Union["Agent", RemoteAgent]] = agents
         self.acts = [None] * len(agents)
         self.episodeDone = False
-        self.max_turns = opt.get("max_turns", 5)
+        # IMPORTANT: NUM TURNS:
+        self.max_turns = 15
         self.current_turns = 0
         self.send_task_data = opt.get("send_task_data", False)
         self.opt = opt

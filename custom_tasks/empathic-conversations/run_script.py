@@ -20,10 +20,6 @@ from dataclasses import dataclass, field
 
 @dataclass
 class ParlAITaskConfig(build_default_task_config("ec-data-conf")):  # type: ignore
-    num_turns: int = field(
-        default=15,
-        metadata={"help": "Number of turns before a conversation is complete"},
-    )
     turn_timeout: int = field(
         default=60,
         metadata={
@@ -35,8 +31,8 @@ class ParlAITaskConfig(build_default_task_config("ec-data-conf")):  # type: igno
 
 @task_script(config=ParlAITaskConfig)
 def main(operator: "Operator", cfg: DictConfig) -> None:
-
-    world_opt = {"num_turns": cfg.num_turns, "turn_timeout": cfg.turn_timeout}
+    # Number of turns is set in chat_world.
+    world_opt = {"turn_timeout": cfg.turn_timeout}
 
     custom_bundle_path = cfg.mephisto.blueprint.get("custom_source_bundle", None)
     if custom_bundle_path is not None:
