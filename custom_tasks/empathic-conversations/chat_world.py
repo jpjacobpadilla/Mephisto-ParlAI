@@ -117,6 +117,8 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
         if remove_sandbox_postfix and name[-8:] == '_sandbox':
             name = name[:-8]
 
+        name = name.replace('worker_id=', '')
+
         query = text('''
             select agent_id
             from agent

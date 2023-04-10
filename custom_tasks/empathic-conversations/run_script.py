@@ -25,7 +25,7 @@ class ParlAITaskConfig(build_default_task_config("ec-data-conf")):  # type: igno
         metadata={"help": "Number of turns before a conversation is complete"},
     )
     turn_timeout: int = field(
-        default=70,
+        default=60,
         metadata={
             "help": "Maximum response time before kicking "
             "a worker out, default 300 seconds"
