@@ -8,7 +8,7 @@ mephisto:
     world_file: ${task_dir}/chat_world.py
     task_description_file: ${task_dir}/task_description.html
     custom_source_dir: ${task_dir}/custom_simple
-    num_conversations: 15
+    num_conversations: 100
   architect:
     port: 3000
   task:
