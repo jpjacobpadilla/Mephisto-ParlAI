@@ -13,7 +13,7 @@ mephisto:
     port: 3000
   task:
     # We expect to be able to handle 25 concurrent conversations without issue
-    max_num_concurrent_units: 25
+    max_num_concurrent_units: 50
     max_launch_timeout: 240  # Yuxuan's new feature.
     task_name: ec-data-collection-task
     task_title: "Article Conversation"
