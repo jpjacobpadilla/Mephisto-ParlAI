@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 @dataclass
 class ParlAITaskConfig(build_default_task_config("ec-data-conf")):  # type: ignore
     turn_timeout: int = field(
-        default=60,
+        default=300,
         metadata={
             "help": "Maximum response time before kicking "
             "a worker out, default 300 seconds"
