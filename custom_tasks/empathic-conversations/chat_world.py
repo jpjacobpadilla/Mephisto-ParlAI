@@ -283,8 +283,13 @@ def get_world_params():
 
 
 def make_world(opt, agents):
+    # First we check if the length of agents is 2. If it is we rotate the order of the workers so that the
+    # one who joined most recently at agents[1] will be at agents[0] and thus talk first.
+    if len(agents) == 2:
+        agents[0], agents[1] = agents[1], agents[0]
+   
+   # This part of the code adds Remote Agents
     bots = []
-
     while len(agents) + len(bots) < 2:
         bot = RemoteAgent({"host_bot": pc.HOST_BOT, 
                            "port_bot": pc.PORT_BOT})
