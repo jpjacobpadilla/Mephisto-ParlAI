@@ -97,12 +97,15 @@ function ChatApp({
     if (remainingState.task_done) {
       setInputMode(INPUT_MODE.DONE);
     } else if (live_update_requested === true) {
+      playNotifSound();
       setInputMode(INPUT_MODE.READY_FOR_INPUT);
+      // Original
       // if (appSettings.useTurns) {
       //   playNotifSound();
       // }
-      playNotifSound();
     } else if (live_update_requested === false) {
+      // Added play sound if live updated requested is false
+      playNotifSound(); 
       setInputMode(INPUT_MODE.WAITING);
     }
     if (Object.keys(remainingState).length > 0) {
