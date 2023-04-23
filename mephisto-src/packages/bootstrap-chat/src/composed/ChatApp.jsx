@@ -98,9 +98,10 @@ function ChatApp({
       setInputMode(INPUT_MODE.DONE);
     } else if (live_update_requested === true) {
       setInputMode(INPUT_MODE.READY_FOR_INPUT);
-      if (appSettings.useTurns) {
-        playNotifSound();
-      }
+      // if (appSettings.useTurns) {
+      //   playNotifSound();
+      // }
+      playNotifSound();
     } else if (live_update_requested === false) {
       setInputMode(INPUT_MODE.WAITING);
     }
