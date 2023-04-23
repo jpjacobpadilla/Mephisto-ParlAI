@@ -220,9 +220,9 @@ class ParlAIChatTaskRunner(TaskRunner):
             assert agent is not None, "task was not fully assigned"
   
         # To randomize order of first talker. Edit by Jacob
-        from parlai.agents._custom.remote import RemoteAgent
-        if not any([isinstance(agent, RemoteAgent) for agent in agents]):
-            shuffle(agents)
+        # from parlai.agents._custom.remote import RemoteAgent
+        # if not any([isinstance(agent, RemoteAgent) for agent in agents]):
+        #     shuffle(agents)
         
         opt: Dict[str, Any] = cast("SharedParlAITaskState", self.shared_state).world_opt
         parlai_agents = [MephistoAgentWrapper(a) for a in agents]
