@@ -546,7 +546,7 @@ class Agent(
         db: "MephistoDB",
         worker: Worker,
         unit: "Unit",
-        provider_data: Dict[str, Any],
+        provider_data: Dict[str, Any]
     ) -> "Agent":
         """
         Wrapper around the new method that allows registering additional

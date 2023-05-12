@@ -3,6 +3,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
+from __future__ import annotations
 
 import time
 from functools import partial
@@ -191,6 +192,7 @@ class WorkerPool:
 
     async def _assign_unit_to_agent(
         self,
+        assignment_id: "jep-assignmentid-db",
         crowd_data: Dict[str, Any],
         worker: "Worker",
         request_id: str,
@@ -227,9 +229,13 @@ class WorkerPool:
                     self.db,
                     worker,
                     unit,
-                    crowd_data,
+                    crowd_data
                 ),
             )
+
+            # add assignment_id attribute to agent instance
+            agent.jep_assignment_id = assignment_id
+
             agent.set_live_run(live_run)
             live_run.client_io.associate_agent_with_registration(
                 agent.get_agent_id(),
@@ -530,9 +536,10 @@ class WorkerPool:
                     init_task_data=init_task_data,
                 ).to_dict(),
             )
-
+    
     async def _assign_unit_or_qa(
         self,
+        assignment_id: "jep-assignmentid-db",
         crowd_data: Dict[str, Any],
         worker: "Worker",
         request_id: str,
@@ -619,7 +626,7 @@ class WorkerPool:
                     return
 
         # Register the correct unit type
-        await self._assign_unit_to_agent(crowd_data, worker, request_id, units)
+        await self._assign_unit_to_agent(assignment_id, crowd_data, worker, request_id, units)
 
     async def register_agent(
         self, crowd_data: Dict[str, Any], worker: "Worker", request_id: str
@@ -727,8 +734,11 @@ class WorkerPool:
                     onboard_agent, cleanup_onboarding
                 )
                 return
-
-        await self._assign_unit_or_qa(crowd_data, worker, request_id, units)
+        
+        # start the process of stringing the assignment_id through each method :)
+        assignment_id = crowd_data.get('assignment_id')
+        print(f'{assignment_id = }')
+        await self._assign_unit_or_qa(assignment_id, crowd_data, worker, request_id, units)
 
     async def push_status_update(
         self, agent: Union["Agent", "OnboardingAgent"]
