@@ -177,7 +177,7 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
                     'cid': conversation_id,
                     'aid': agent.ec2_agent_id, # primary key
                     'auid': f'{agent.mephisto_agent.unit_id}{pc.MEPHISTO_INSTANCE}' if not isinstance(agent, RemoteAgent) else None,
-                    'aidquerystring': agent.mephisto_agent.jep_assignment_id
+                    'aidquerystring': agent.mephisto_agent.jep_assignment_id if not isinstance(agent, RemoteAgent) else None
                 }
                 conn.execute(query, params)
 
@@ -295,7 +295,9 @@ def make_world(opt, agents):
     while len(agents) + len(bots) < 2:
         bot = RemoteAgent({"host_bot": pc.HOST_BOT, 
                            "port_bot": pc.PORT_BOT})
-        
+        # Change screen name
+        bot.id = pc.BOT_SCREEN_NAME
+
         # agent_name_for_db should match the agent description in the database.
         bot.agent_name_for_db = pc.BOT_NAME
 
