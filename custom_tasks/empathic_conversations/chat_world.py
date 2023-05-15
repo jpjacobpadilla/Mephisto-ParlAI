@@ -281,7 +281,7 @@ def validate_onboarding(data):
 
 
 def get_world_params():
-    return {"agent_count": 2}
+    return {"agent_count": pc.AGENT_COUNT_PER_CONVO}
 
 
 def make_world(opt, agents):
