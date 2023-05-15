@@ -28,8 +28,6 @@ mephisto-data/data/
 
 # Node Stuff
 node_modules/
-package-lock.json
-package.json
 
 # Mephisto Stuff
 outputs/
