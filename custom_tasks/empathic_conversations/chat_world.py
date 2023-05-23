@@ -14,7 +14,7 @@ from sqlalchemy.engine.base import Engine
 import project_credentials as pc  # project credentials for database and Remote Agent
 
 from typing import List, Union
-
+import re
 import json
 import yaml
 
@@ -50,7 +50,8 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
         self.acts = [None] * len(agents)
         self.episodeDone = False
         # IMPORTANT: NUM TURNS:
-        self.max_turns = 15
+        self.max_turns = 25
+        self.min_turns = 15
         self.current_turns = 0
         self.send_task_data = opt.get("send_task_data", False)
         self.opt = opt
@@ -189,6 +190,7 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
         """
         acts = self.acts
         self.current_turns += 1
+        agents_said_bye = []
         for index, agent in enumerate(self.agents):
             try:
                 acts[index] = agent.act(timeout=self.opt["turn_timeout"])
@@ -205,13 +207,19 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
             except TypeError:
                 acts[index] = agent.act()  # not MTurkAgent
                 self.add_utterance_db(agent_id=agent.ec2_agent_id, utterance=acts[index].get('text'))
+            
+            # See if the client is saying bye
+            # examples: bye, bye!, bye.,  bye, Bye!
+            pattern = r'^\s*(?i:bye)[.!]*\s*$'
+            agents_said_bye.append(re.match(pattern, acts[index].get('text')))
+
             if acts[index]["episode_done"]:
                 self.episodeDone = True
             for other_agent in self.agents:
                 if other_agent != agent:
                     other_agent.observe(validate(acts[index]))
-
-        if self.current_turns >= self.max_turns:
+       
+        if self.current_turns >= self.max_turns or all(agents_said_bye) and self.current_turns >= self.min_turns:
             self.episodeDone = True
             for agent in self.agents:
                 if isinstance(agent, RemoteAgent):
