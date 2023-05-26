@@ -289,14 +289,14 @@ class ParlAIChatTaskRunner(TaskRunner):
         agent.observe({"task_data": {"task_done": True}})
 
         world.shutdown()
-        if hasattr(world, "prep_save_data"):
-            agent.observe(
-                {
-                    "id": "SUBMIT_WORLD_DATA",
-                    "WORLD_DATA": world.prep_save_data(parlai_agents),
-                    "text": "",
-                }
-            )
+        # if hasattr(world, "prep_save_data"):
+        #     agent.observe(
+        #         {
+        #             "id": "SUBMIT_WORLD_DATA",
+        #             "WORLD_DATA": world.prep_save_data(parlai_agents),
+        #             "text": "",
+        #         }
+        #     )
 
     def cleanup_unit(self, unit: "Unit") -> None:
         """Handle cleanup for a specific unit"""
