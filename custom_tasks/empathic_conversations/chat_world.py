@@ -11,7 +11,7 @@ from joblib import Parallel, delayed  # type: ignore
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine.base import Engine
-import project_credentials as pc  # project credentials for database and Remote Agent
+import project_credentials as pc  # project credentials for Remote Agent
 
 from typing import List, Union
 import re
@@ -66,9 +66,6 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
         # Empathic conversations 2 research database
         self.ec2_engine = create_engine(conn_string)
 
-        # Local Mephisto db
-        self.local_engine = create_engine(f'sqlite:///{pc.LOCAL_SQLITE_PATH}')
-
         # Make sure that the agents are in the agent table in the ec_2 schema, research database
         self.add_agents_db()
         # Add a conversation to the "conversation" table
@@ -83,7 +80,7 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
 
     def add_agents_db(self) -> None:
         """
-        Makes sure that each Agent table is in the ec2 schema.
+        Makes sure that each Agent is in the ec2 schema.
 
         This method gets the worker_id (name) of the agent which should be unique and then
         self.agent_db_setup() will take the worker name and update the table. Then it will return 
@@ -98,16 +95,7 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
                 id = self._agent_db_setup(agent.agent_name_for_db, type='c')
 
             else:
-                # Get worker_id that was sent via query string. This is located in the Mephisto local db
-                query = text('''
-                    select worker_name
-                    from workers as w
-                    inner join agents as a on a.worker_id=w.worker_id
-                    where a.unit_id = :unit_id;''')
-
-                with self.local_engine.begin() as conn:
-                    result = conn.execute(query, {'unit_id': f'{agent.mephisto_agent.unit_id}'})
-                    worker_name = result.fetchone()[0]
+                worker_name = agent.jep_worker_id  # Probably don't need this, but it's easier than changing the rest of the code.
 
                 print(f'Worker Name: {worker_name} Unit ID: {agent.mephisto_agent.unit_id} Instance: {pc.MEPHISTO_INSTANCE}')
 
