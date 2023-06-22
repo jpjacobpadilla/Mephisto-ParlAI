@@ -95,7 +95,7 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
                 id = self._agent_db_setup(agent.agent_name_for_db, type='c')
 
             else:
-                worker_name = agent.jep_worker_id  # Probably don't need this, but it's easier than changing the rest of the code.
+                worker_name = agent.mephisto_agent.jep_worker_id  # Probably don't need this, but it's easier than changing the rest of the code.
 
                 print(f'Worker Name: {worker_name} Unit ID: {agent.mephisto_agent.unit_id} Instance: {pc.MEPHISTO_INSTANCE}')
 
@@ -107,9 +107,9 @@ class MultiAgentDialogWorld(CrowdTaskWorld):
 
 
     def _agent_db_setup(self, name: str, type: Union['w', 'c'], remove_sandbox_postfix=True) -> int:
-        if remove_sandbox_postfix and name[-8:] == '_sandbox':
+        if remove_sandbox_postfix and name[-8:] == '_sandbox':  # remove suffix isn't until py 3.9 :(
             name = name[:-8]
-
+        
         name = name.replace('worker_id=', '')
 
         query = text('''
