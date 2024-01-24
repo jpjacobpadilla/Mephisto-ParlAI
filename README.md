@@ -1,3 +1,3 @@
-# Mephisto-ParlAI
+<h1 align="center">Mephisto-ParlAI</h1>
 
-A fork of [Mephisto](https://github.com/facebookresearch/Mephisto) with some added functionality to store conversations in a MySQL database, allow for variable conversation length, and a  conversational chatbot fallback if there are no other people to talk to.
+Welcome to the Mephisto-ParlAI Enhanced project! This repository contains a modified version of the original [Mephisto](https://github.com/facebookresearch/Mephisto) project, developed by Facebook Research. Our version extends the functionalities of Mephisto, focusing on flexibility and data management for NLP research. We've integrated features such as storing conversations in a MySQL database, supporting variable conversation lengths, and providing a conversational chatbot fallback when no human participants are available.
