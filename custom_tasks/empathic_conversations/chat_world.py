@@ -306,7 +306,6 @@ def make_world(opt, agents):
     bot.observe({"text": "dummy"})
     _ = bot.act()
     bot.observe({"text": "begin"})
-    _ = bot.act()
 
     agents.insert(0, bot)
     return MultiAgentDialogWorld(opt, agents)
