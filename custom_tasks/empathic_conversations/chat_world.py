@@ -283,33 +283,30 @@ def get_world_params():
 
 
 def make_world(opt, agents):
+    if len(agents) < 1 or len(agents) > 2:
+        raise Exception(f'There should only ever be one or two agents in this list. Found: {agents}')
+
     # First we check if the length of agents is 2. If it is we rotate the order of the workers so that the
     # one who joined most recently at agents[1] will be at agents[0] and thus talk first.
     if len(agents) == 2:
         agents[0], agents[1] = agents[1], agents[0]
+        return MultiAgentDialogWorld(opt, agents)
    
-   # This part of the code adds Remote Agents
-    bots = []
-    while len(agents) + len(bots) < 2:
-        bot = RemoteAgent({"host_bot": pc.HOST_BOT, 
-                           "port_bot": pc.PORT_BOT})
-        # Change screen name
-        bot.id = pc.BOT_SCREEN_NAME
+    bot = RemoteAgent(
+        {"host_bot": pc.HOST_BOT, "port_bot": pc.PORT_BOT}
+    )
+    # Change screen name
+    bot.id = pc.BOT_SCREEN_NAME
+    # agent_name_for_db should match the agent description in the database.
+    bot.agent_name_for_db = pc.BOT_NAME
 
-        # agent_name_for_db should match the agent description in the database.
-        bot.agent_name_for_db = pc.BOT_NAME
+    # This is a hack to skip the OverWorld and TaskWorld by 
+    # sending dummy messages. OverWorld accept any message
+    # and TaskWorld accept only "begin" as the identifier.
+    bot.observe({"text": "dummy"})
+    _ = bot.act()
+    bot.observe({"text": "begin"})
+    _ = bot.act()
 
-        # This is a hack to skip the OverWorld and TaskWorld by 
-        # sending dummy messages. OverWorld accept any message
-        # and TaskWorld accept only "begin" as the identifier.
-        bot.observe({"text": "dummy"})
-        _ = bot.act()
-        bot.observe({"text": "begin"})
-        _ = bot.act()
-
-        bots.append(bot)
-
-    # Combine agents with bots
-    agents.extend(bots)
-
+    agents.insert(0, bot)
     return MultiAgentDialogWorld(opt, agents)
